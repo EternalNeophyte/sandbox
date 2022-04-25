@@ -1,5 +1,12 @@
 package edu.sandbox.samples.ml.stellar;
 
+import ai.djl.modality.nlp.embedding.ModelZooTextEmbedding;
+import ai.djl.nn.Activation;
+import ai.djl.nn.Block;
+import ai.djl.nn.Blocks;
+import ai.djl.nn.SequentialBlock;
+import ai.djl.nn.core.Linear;
+import ai.djl.training.dataset.RandomAccessDataset;
 import com.opencsv.bean.CsvToBeanBuilder;
 import edu.sandbox.samples.ml.MetaProperties;
 import org.apache.logging.log4j.LogManager;
@@ -10,13 +17,14 @@ import java.nio.file.Files;
 import java.util.List;
 
 public record StellarPresets
-        (List<StellarObject> csvObjects)
-        implements MetaProperties.Csv {
+        (RandomAccessDataset dataset,
+         Block neuralNetwork)
+        implements MetaProperties.Csv, MetaProperties.NeuralNetwork {
 
     private static final Logger LOG = LogManager.getLogger(StellarPresets.class);
 
     public static StellarPresets setup() {
-        return new StellarPresets(newCsvObjects());
+        return new StellarPresets(newDataset(), newNeuralNetwork());
     }
 
     private static List<StellarObject> newCsvObjects() {
@@ -32,6 +40,34 @@ public record StellarPresets
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static RandomAccessDataset newDataset() {
+        return new StellarDataset.Builder(newCsvObjects()).build();
+    }
+
+    private static Block newNeuralNetwork() {
+        return new SequentialBlock()
+                .add(Blocks.batchFlattenBlock(INPUTS))
+                .add(Linear.builder()
+                        .setUnits(FIRST_LAYER_UNITS)
+                        .build()
+                )
+                .add(Activation::relu)
+                .add(Linear.builder()
+                        .setUnits(SECOND_LAYER_UNITS)
+                        .build()
+                )
+                .add(Activation::sigmoid)
+                .add(Linear.builder()
+                        .setUnits(THIRD_LAYER_UNITS)
+                        .build()
+                )
+                .add(Activation::relu)
+                .add(Linear.builder()
+                        .setUnits(OUTPUTS)
+                        .build()
+                );
     }
 
 }

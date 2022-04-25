@@ -12,6 +12,15 @@ public interface MetaProperties {
         boolean IGNORE_QUOTATIONS = true;
     }
 
+    interface NeuralNetwork {
+
+        long INPUTS = 0xDD,
+                FIRST_LAYER_UNITS = 0xAA,
+                SECOND_LAYER_UNITS = 0x44,
+                THIRD_LAYER_UNITS = 0x77,
+                OUTPUTS = 3;
+    }
+
     interface Trainig {
 
         int BATCH_SIZE = 64, FINAL_IMG_SIDE = 100;
