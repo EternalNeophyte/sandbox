@@ -1,6 +1,5 @@
 package edu.sandbox.samples.quicks;
 
-import java.math.BigDecimal;
 import java.text.DecimalFormat;
 
 public class Main {
